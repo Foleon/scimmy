@@ -49,7 +49,7 @@ export class ServiceProviderConfig extends Types.Resource {
      * @implements {SCIMMY.Types.Resource#read}
      * @returns {SCIMMY.Schemas.ServiceProviderConfig}
      */
-    async read() {
+    async read(context) {
         return new Schemas.ServiceProviderConfig(Config.get(), ServiceProviderConfig.basepath());
     }
 }

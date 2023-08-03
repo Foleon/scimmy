@@ -49,7 +49,7 @@ export class Schema extends Types.Resource {
      * @implements {SCIMMY.Types.Resource#read}
      * @returns {SCIMMY.Messages.ListResponse|Object}
      */
-    async read() {
+    async read(context) {
         if (!this.id) {
             return new Messages.ListResponse(Schemas.declared().map((S) => S.describe(Schema.basepath())));
         } else {
