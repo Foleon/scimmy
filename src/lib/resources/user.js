@@ -80,13 +80,13 @@ export class User extends Types.Resource {
      * // Retrieve users with an email ending in "@example.com"
      * await (new SCIMMY.Resources.User({filter: 'email.value -ew "@example.com"'})).read();
      */
-    async read() {
+    async read(context) {
         if (!this.id) {
-            return new Messages.ListResponse((await User.#egress(this))
+            return new Messages.ListResponse((await User.#egress(this, context))
                 .map(u => new Schemas.User(u, "out", User.basepath(), this.attributes)), this.constraints);
         } else {
             try {
-                return new Schemas.User((await User.#egress(this)).shift(), "out", User.basepath(), this.attributes);
+                return new Schemas.User((await User.#egress(this, context)).shift(), "out", User.basepath(), this.attributes);
             } catch (ex) {
                 if (ex instanceof Types.Error) throw ex;
                 else if (ex instanceof TypeError) throw new Types.Error(400, "invalidValue", ex.message);
@@ -105,7 +105,7 @@ export class User extends Types.Resource {
      * // Set userName attribute to "someGuy" for user with ID "1234"
      * await (new SCIMMY.Resources.User("1234")).write({userName: "someGuy"});
      */
-    async write(instance) {
+    async write(instance, context) {
         if (instance === undefined)
             throw new Types.Error(400, "invalidSyntax", `Missing request body payload for ${!!this.id ? "PUT" : "POST"} operation`);
         if (Object(instance) !== instance || Array.isArray(instance))
@@ -114,7 +114,7 @@ export class User extends Types.Resource {
         try {
             // TODO: handle incoming read-only and immutable attribute tests
             return new Schemas.User(
-                await User.#ingress(this, new Schemas.User(instance, "in")),
+                await User.#ingress(this, new Schemas.User(instance, "in"), context),
                 "out", User.basepath(), this.attributes
             );
         } catch (ex) {
@@ -132,7 +132,7 @@ export class User extends Types.Resource {
      * // Set userName to "someGuy" for user with ID "1234" with a patch operation (see SCIMMY.Messages.PatchOp)
      * await (new SCIMMY.Resources.User("1234")).patch({Operations: [{op: "add", value: {userName: "someGuy"}}]});
      */
-    async patch(message) {
+    async patch(message, context) {
         if (message === undefined)
             throw new Types.Error(400, "invalidSyntax", "Missing message body from PatchOp request");
         if (Object(message) !== message || Array.isArray(message))
@@ -140,8 +140,8 @@ export class User extends Types.Resource {
         
         try {
             return await new Messages.PatchOp(message)
-                .apply(new Schemas.User((await User.#egress(this)).shift(), "out"), 
-                    async (instance) => await User.#ingress(this, instance))
+                .apply(new Schemas.User((await User.#egress(this, context)).shift(), "out"), 
+                    async (instance) => await User.#ingress(this, instance, context))
                 .then(instance => !instance ? undefined : new Schemas.User(instance, "out", User.basepath(), this.attributes));
         } catch (ex) {
             if (ex instanceof Types.Error) throw ex;
@@ -156,8 +156,8 @@ export class User extends Types.Resource {
      * // Delete user with ID "1234"
      * await (new SCIMMY.Resources.User("1234")).dispose();
      */
-    async dispose() {
-        if (!!this.id) await User.#degress(this);
+    async dispose(context) {
+        if (!!this.id) await User.#degress(this, context);
         else throw new Types.Error(404, null, "DELETE operation must target a specific resource");
     }
 }

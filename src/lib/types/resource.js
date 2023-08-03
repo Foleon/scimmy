@@ -247,7 +247,7 @@ export class Resource {
      * *   The specifically requested resource instance, if an ID was supplied to resource constructor.
      * @abstract
      */
-    read() {
+    read(context) {
         throw new TypeError(`Method 'read' not implemented by resource '${this.constructor.name}'`);
     }
     
@@ -257,7 +257,7 @@ export class Resource {
      * @returns {SCIMMY.Types.Schema} the consumed resource type instance
      * @abstract
      */
-    write(instance) {
+    write(instance, context) {
         throw new TypeError(`Method 'write' not implemented by resource '${this.constructor.name}'`);
     }
     
@@ -268,7 +268,7 @@ export class Resource {
      * @returns {SCIMMY.Types.Schema} the resource type instance after patching and consumption by ingress method
      * @abstract
      */
-    patch(message) {
+    patch(message, context) {
         throw new TypeError(`Method 'patch' not implemented by resource '${this.constructor.name}'`);
     }
     
@@ -276,7 +276,7 @@ export class Resource {
      * Calls resource's degress method for disposal of the SCIM resource
      * @abstract
      */
-    dispose() {
+    dispose(context) {
         throw new TypeError(`Method 'dispose' not implemented by resource '${this.constructor.name}'`);
     }
 }

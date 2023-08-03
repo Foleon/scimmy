@@ -50,7 +50,7 @@ export class ResourceType extends Types.Resource {
      * @implements {SCIMMY.Types.Resource#read}
      * @returns {SCIMMY.Messages.ListResponse|SCIMMY.Schemas.ResourceType}
      */
-    async read() {
+    async read(context) {
         if (!this.id) {
             return new Messages.ListResponse(Object.entries(Resources.declared())
                 .map(([,R]) => new Schemas.ResourceType(R.describe(), ResourceType.basepath())));
