@@ -82,8 +82,16 @@ export class Group extends Types.Resource {
      */
     async read(context) {
         if (!this.id) {
-            return new Messages.ListResponse((await Group.#egress(this, context))
-                .map(u => new Schemas.Group(u, "out", Group.basepath(), this.attributes)), this.constraints);
+            const callbackResult = await Group.#egress(this, context);
+
+            if (!Array.isArray(callbackResult)) {
+                return new Messages.ListResponse(callbackResult, this.constraints);
+            }
+
+            return new Messages.ListResponse(
+                callbackResult.map(u => new Schemas.Group(u, "out", Group.basepath(), this.attributes)), 
+                this.constraints
+            );
         } else {
             try {
                 return new Schemas.Group((await Group.#egress(this, context)).shift(), "out", Group.basepath(), this.attributes);
