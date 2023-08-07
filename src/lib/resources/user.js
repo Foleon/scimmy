@@ -82,8 +82,16 @@ export class User extends Types.Resource {
      */
     async read(context) {
         if (!this.id) {
-            return new Messages.ListResponse((await User.#egress(this, context))
-                .map(u => new Schemas.User(u, "out", User.basepath(), this.attributes)), this.constraints);
+            const callbackResult = await User.#egress(this, context);
+
+            if (!Array.isArray(callbackResult)) {
+                return new Messages.ListResponse(callbackResult, this.constraints);
+            }
+
+            return new Messages.ListResponse(
+                callbackResult.map(u => new Schemas.User(u, "out", User.basepath(), this.attributes)),
+                this.constraints
+            );
         } else {
             try {
                 return new Schemas.User((await User.#egress(this, context)).shift(), "out", User.basepath(), this.attributes);
